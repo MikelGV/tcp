@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"log"
 	"net"
+	"time"
 )
 
 /* Here goes all the tcp functionalities */
@@ -82,5 +83,18 @@ func (t *TCPCHAN[T]) handleConnection(conn net.Conn) {
 
         t.OutChan <- messsage
     }
+}
+
+func (t *TCPCHAN[T]) dialRemoteAndRead() {
+    
+    connection, err := net.Dial("tcp", t.remoteAddress)
+
+    if err != nil {
+
+        log.Printf("dial error (%s)", err)
+        time.Sleep(time.Second * 5)
+        t.dialRemoteAndRead()
+    }
+    t.outBoundCon = connection
 }
 
