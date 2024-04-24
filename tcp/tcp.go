@@ -9,7 +9,7 @@ import (
 
 /* Here goes all the tcp functionalities */
 
-type TCPCHAN[T any] struct {
+type TCPCHAN[T string] struct {
     
     listenAddress string
     remoteAddress string
@@ -21,7 +21,7 @@ type TCPCHAN[T any] struct {
     listener net.Listener
 }
 
-func New[T any](lAddr, remoteAddr string) (*TCPCHAN[T], error) {
+func New[T string](lAddr, remoteAddr string) (*TCPCHAN[T], error) {
     tcp := &TCPCHAN[T]{
         listenAddress: lAddr,
         remoteAddress: remoteAddr,
@@ -38,6 +38,8 @@ func New[T any](lAddr, remoteAddr string) (*TCPCHAN[T], error) {
     tcp.listener = ln
 
     go tcp.loop()
+    go tcp.accLoop()
+    go tcp.dialRemoteAndRead()
 
     return tcp, nil
 }
@@ -53,6 +55,7 @@ func (t *TCPCHAN[T]) loop() {
 }
 
 func (t *TCPCHAN[T]) accLoop() {
+
     defer func() {
         t.listener.Close()
     }()
@@ -92,7 +95,7 @@ func (t *TCPCHAN[T]) dialRemoteAndRead() {
     if err != nil {
 
         log.Printf("dial error (%s)", err)
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         t.dialRemoteAndRead()
     }
     t.outBoundCon = connection
