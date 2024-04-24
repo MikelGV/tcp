@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/MikelGV/tcp/tcp"
@@ -11,6 +13,11 @@ import (
 /* Here goes all the tcp functionalities */
 
 func main() {
+    reader := bufio.NewReader(os.Stdin)
+    line, err := reader.ReadString('\n')
+    if err != nil {
+        log.Fatal(err)
+    }
     localChannel, err := tcp.New[string]("localhost:3000", "localhost:8080")
 
     if err != nil {
@@ -20,7 +27,7 @@ func main() {
 
     go func() {
         time.Sleep(5 * time.Second)
-        localChannel.InChan <- "test 1"
+        localChannel.InChan <- line
     }()
 
     remoteChannel, err := tcp.New[string]("localhost:8080", "localhost:3000" )
